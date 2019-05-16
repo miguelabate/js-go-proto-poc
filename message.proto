@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option go_package = "mymessages";
+
+message MessageMike {
+    string text = 1;
+    string lang = 2;
+    float length = 3;
+    int32 years = 4;
+
+}

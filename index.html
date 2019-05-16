@@ -1,0 +1,41 @@
+<html>
+  <head>
+    <!-- closure lib from google -->
+	<script src="../closure-library/closure/goog/base.js"></script>
+
+  <!-- Protobuf -->
+	<script src="../protobuf/js/binary/constants.js"></script>
+	<script src="../protobuf/js/binary/utils.js"></script>
+	<script src="../protobuf/js/binary/arith.js"></script>
+	<script src="../protobuf/js/binary/decoder.js"></script>
+	<script src="../protobuf/js/binary/encoder.js"></script>
+	<script src="../protobuf/js/binary/reader.js"></script>
+	<script src="../protobuf/js/binary/writer.js"></script>
+	<script src="../protobuf/js/map.js"></script>
+	<script src="../protobuf/js/message.js"></script>
+
+  <!-- Generated from proto -->
+  <script src="./build/gen/MyMessages.js"></script>
+
+  </head>
+  <body>
+    <pre id="content"></pre>
+    <button onClick="sendMessage()">send message to server</button>
+    <script type="text/javascript">
+
+    goog.require('proto.MessageMike');
+
+    function sendMessage(){
+  		let message =  new proto.MessageMike();
+  		message.setText('Miguel');
+  		message.setLang('esp');
+      message.setYears(35);
+      message.setLength(223.442);
+
+  		console.log(message);
+  		console.log(message.toObject());
+  		console.log(message.serializeBinary());
+    }
+    </script>
+  </body>
+</html>
