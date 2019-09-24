@@ -20,5 +20,5 @@ https://developers.google.com/closure/library/docs/gettingstarted
 https://github.com/protocolbuffers/protobuf/releases/tag/v3.8.0-rc1
 
 - compile proto for JS
-protoc --proto_path=./ --js_out=library=MyMessages,binary:build/gen ./proto/message.proto
+protoc --proto_path=../ --js_out=library=MyMessages,binary:build/gen ../proto/message.proto
 

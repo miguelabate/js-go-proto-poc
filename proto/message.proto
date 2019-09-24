@@ -2,10 +2,51 @@ syntax = "proto3";
 
 option go_package = "mymessages";
 
-message MessageMike {
-    string text = 1;
-    string lang = 2;
-    float length = 3;
-    int32 years = 4;
+message ClientEvent {
+    oneof event {
+        UpsertPerson upsert_person = 1;
+        QueryPerson query_person = 2;
+    }
+}
+//Async events
+//insert or update a Person entity
+message UpsertPerson {
+    Person person = 1;
+}
 
+//triggers the publishing of QueryPersonResult with the Person objects matching the query 
+message QueryPerson {
+    string name_regexp = 1;
+}
+
+message QueryPersonResult {
+    repeated Person persons = 1;
+}
+
+//model
+//using this structure to keep all the Persons persisted
+message PersonDB {
+    repeated Person persons = 1;
+}
+
+message Person {
+    string name = 1;
+    repeated string characteristics = 2;
+    float height = 3;
+    int32 years = 4;
+    repeated Address known_addresses = 5;
+    bool has_police_record = 6;
+    Gender gender = 7;
+}
+
+message Address {
+    string street = 1;
+    int32 number = 2;
+    string city = 3;
+    string country = 4;
+}
+
+enum Gender {
+    MALE = 0;
+    FEMALE = 1;
 }

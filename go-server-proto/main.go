@@ -1,34 +1,20 @@
 package main
 
 import (
-	"go-server-proto/mymessages"
-
+	"encoding/json"
 	"flag"
+	mymessages "go-server-proto/proto"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/golang/protobuf/proto"
-
 	"github.com/gorilla/websocket"
 )
 
-//func main() {
-//	msg := &mymessages.MessageMike{Text: "dfds"}
-//	data, err := proto.Marshal(msg)
-//	if err != nil {
-//		log.Fatal("marshaling error: ", err)
-//	}
-//	newMsg := &mymessages.MessageMike{}
-//	err = proto.Unmarshal(data, newMsg)
-//	if err != nil {
-//		log.Fatal("unmarshaling error: ", err)
-//	}
-//	// Now test and newTest contain the same data.
-//	if msg.GetText() != newMsg.GetText() {
-//		log.Fatalf("data mismatch %q != %q", msg.GetText(), newMsg.GetText())
-//	}
-
 var addr = flag.String("addr", ":8081", "http service address")
+var allPersons []*mymessages.Person
 
 //var upgrader = websocket.Upgrader{} // default options dont work cross origin
 var upgrader = websocket.Upgrader{
@@ -39,7 +25,7 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func echo(w http.ResponseWriter, r *http.Request) {
+func ws(w http.ResponseWriter, r *http.Request) {
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
@@ -52,36 +38,86 @@ func echo(w http.ResponseWriter, r *http.Request) {
 			log.Println("read:", err)
 			break
 		}
-		//log.Printf("recv: %s", message)
-		receivedMsg := &mymessages.MessageMike{}
-		err = proto.Unmarshal(message, receivedMsg)
+		log.Printf("received: %s", message)
+		clientEvent := &mymessages.ClientEvent{}
+		err = proto.Unmarshal(message, clientEvent)
 		if err != nil {
 			log.Fatal("unmarshaling error: ", err)
 		}
-		log.Printf("recv: %s", receivedMsg)
+		log.Printf("received: %s", clientEvent)
 
-		//now modify and send
-		receivedMsg.Text = receivedMsg.GetText() + " Altered content"
-		receivedMsg.Lang = receivedMsg.GetLang() + " Altered lang"
-		receivedMsg.Length = receivedMsg.GetLength() * 1.5
-		receivedMsg.Years = receivedMsg.GetYears() + 10
-
-		dataToSend, err := proto.Marshal(receivedMsg)
-		if err != nil {
-			log.Fatal("marshaling error: ", err)
+		if clientEvent.GetUpsertPerson() != nil {
+			handleUpsert(clientEvent.GetUpsertPerson())
+		}
+		if clientEvent.GetQueryPerson() != nil {
+			handleQuery(clientEvent.GetQueryPerson(), c)
 		}
 
-		err = c.WriteMessage(websocket.BinaryMessage, dataToSend)
-		if err != nil {
-			log.Println("write:", err)
-			break
+	}
+	log.Print("Ended a client session. Refresh persisted DB.")
+	persistToDisk()
+}
+
+func persistToDisk() {
+	personsdb_obj := mymessages.PersonDB{}
+	personsdb_obj.Persons = allPersons
+	persondb_bytes, _ := json.Marshal(personsdb_obj)
+	err := ioutil.WriteFile("myPersonsDB", persondb_bytes, 0644)
+	if err != nil {
+		log.Fatal("persist persons to disk error: ", err)
+	}
+}
+
+func loadFromDisk() {
+	dat, err := ioutil.ReadFile("myPersonsDB")
+	if err != nil {
+		log.Print("read persons from disk error: ", err)
+		return
+	}
+	personsdb_obj := &mymessages.PersonDB{}
+	err = json.Unmarshal(dat, personsdb_obj)
+	if err != nil {
+		log.Fatal("unmarshalling from disk error: ", err)
+	}
+
+	allPersons = personsdb_obj.Persons
+}
+
+func handleUpsert(cliEvent *mymessages.UpsertPerson) {
+	allPersons = append(allPersons, cliEvent.GetPerson())
+}
+
+func handleQuery(query *mymessages.QueryPerson, c *websocket.Conn) {
+	foundPersons := make([]*mymessages.Person, 0)
+
+	for _, person := range allPersons {
+		if strings.Contains(person.GetName(), query.GetNameRegexp()) {
+			foundPersons = append(foundPersons, person)
 		}
+	}
+
+	result := new(mymessages.QueryPersonResult)
+	result.Persons = foundPersons
+
+	dataToSend, err := proto.Marshal(result)
+	if err != nil {
+		log.Fatal("marshaling error: ", err)
+	}
+
+	err = c.WriteMessage(websocket.BinaryMessage, dataToSend)
+	if err != nil {
+		log.Println("write error:", err)
 	}
 }
 
 func main() {
 	flag.Parse()
 	log.SetFlags(0)
-	http.HandleFunc("/echo", echo)
+
+	//init slice. Common for all clients.
+	allPersons = make([]*mymessages.Person, 0)
+	loadFromDisk()
+
+	http.HandleFunc("/ws", ws)
 	log.Fatal(http.ListenAndServe(*addr, nil))
 }

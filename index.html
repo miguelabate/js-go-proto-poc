@@ -36,8 +36,7 @@
         if (ws) {
           return false;
         }
-        ws = new WebSocket("ws://192.168.178.248:8081/echo");
-        //socket.binaryType = 'blob'; //arraybuffer
+        ws = new WebSocket("ws://127.0.0.1:8081/echo");
         ws.onopen = function(evt) {
           print("OPEN");
         }
@@ -80,7 +79,7 @@
         message.setLang(inputLang.value);
         message.setYears(inputYears.value);
         message.setLength(inputLength.value);
-        print("SEND: " + message.toString());
+        print("SENT: " + message.toString());
         ws.send(message.serializeBinary());
         return false;
       };
@@ -99,9 +98,10 @@
   <table>
     <tr>
       <td valign="top" width="50%">
-        <p>Click "Open" to create a connection to the server,
-          "Send" to send a message to the server and "Close" to close the connection.
-          You can change the message and send multiple times.
+        <p>"Open" to create a connection to the server<br>
+          "Send" to send a message to the server<br>
+	 "Close" to close the connection<br>
+          You can change the message and send it. Then will receive an echo from the server with the message fields modified.
           <p>
             <form>
               <button id="open">Open</button>
