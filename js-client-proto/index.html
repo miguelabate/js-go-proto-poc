@@ -2,6 +2,7 @@
 <html>
 
 <head>
+
   <!-- closure lib from google -->
   <script src="libs-js/closure-library/closure/goog/base.js"></script>
 
@@ -29,25 +30,26 @@
         <p>"Open" to create a connection to the server<br>
           "Send" to send a message to the server<br>
           "Close" to close the connection<br>
-
+          "Query" queries by the name field<br>
+          
           <p>
-            <form>
-              <button id="open">Open</button>
-              <button id="close">Close</button>
-              <p>Name: <input id="inputName" type="text" value="Alfred Gilmore"></p>
-              <p>Characteristics (list ; separated): <input id="inputCharacteristics" type="text" value="blond;green eyes;tattoo">
-              </p>
-              <p>Height: <input id="inputHeight" type="text" value="1.56"></p>
-              <p>Years: <input id="inputYears" type="text" value="14"></p>
-              <p>Addresses (list ; separated in the form street|number|city|country): <input id="inputAddresses"
-                  type="text" value="Main St.|123|Utrecht|Netherlands" size="80"></p>
-              <p>Has police record: <input id="inputPolRecord" type="checkbox" value="false"></p>
-              <p><input type="radio" id="inputGender" value="MALE" checked="true"> Male<br>
-                <input type="radio" id="inputGender" value="FEMALE"> Female<br></p>
-              <button id="send">Send</button>
-              <p>Query by name: <input id="queryByName" type="text" value="Alf"></p>
-              <button id="query">Query</button>
-            </form>
+            <button id="open">Open</button>
+            <button id="close">Close</button>
+            <p>Name: <input id="inputName" type="text" value="Alfred Gilmore"></p>
+            <p>Characteristics (list ; separated): <input id="inputCharacteristics" type="text"
+                value="blond;green eyes;tattoo">
+            </p>
+            <p>Height: <input id="inputHeight" type="text" value="1.56"></p>
+            <p>Years: <input id="inputYears" type="text" value="14"></p>
+            <p>Addresses (list ; separated in the form street|number|city|country): <input id="inputAddresses"
+                type="text" value="Main St.|123|Utrecht|Netherlands" size="80"></p>
+            <p>Has police record: <input id="inputPolRecord" type="checkbox" value="false"></p>
+            <p><input type="radio" id="inputGender" value="MALE" checked="true"> Male<br>
+              <input type="radio" id="inputGender" value="FEMALE"> Female<br></p>
+            <button id="send">Send</button>
+            <p>Query by name: <input id="queryByName" type="text" value="Alf"></p>
+            <button id="query">Query</button>
+
       </td>
       <td valign="top" width="50%">
         <p>Output:</p>
